@@ -1,0 +1,1 @@
+# Netwise.XrmToolBox.RolesHelper
