@@ -2,6 +2,7 @@
 using Netwise.XrmToolBox.RolesHelper.Models;
 using Netwise.XrmToolBox.RolesHelper.Properties;
 using System.Collections.Generic;
+using WB_Permissions;
 
 namespace Netwise.XrmToolBox.RolesHelper
 {
@@ -15,11 +16,11 @@ namespace Netwise.XrmToolBox.RolesHelper
         /// </summary>
         public static readonly List<ModelDepthMask> DepthMasks = new List<ModelDepthMask>()
         {
-            new ModelDepthMask(PrivilegeDepthMaskEnum.None, "None", Resources.Empty),
-            new ModelDepthMask(PrivilegeDepthMaskEnum.User, "User (Basic)", Resources.User),
-            new ModelDepthMask(PrivilegeDepthMaskEnum.BusinessUnit, "Business Unit (Local)", Resources.BusinessUnit),
-            new ModelDepthMask(PrivilegeDepthMaskEnum.ParentBusinessUnit, "Parental (Deep)", Resources.ParentBusinessUnit),
-            new ModelDepthMask(PrivilegeDepthMaskEnum.Organization, "Organization (Global)", Resources.Organization)
+            new ModelDepthMask(PrivilegeDepthMaskEnum.None, "None", Resources.Empty, RoleRange.None),
+            new ModelDepthMask(PrivilegeDepthMaskEnum.User, "User (Basic)", Resources.User, RoleRange.User),
+            new ModelDepthMask(PrivilegeDepthMaskEnum.BusinessUnit, "Business Unit (Local)", Resources.BusinessUnit, RoleRange.BusinessUnit),
+            new ModelDepthMask(PrivilegeDepthMaskEnum.ParentBusinessUnit, "Parental (Deep)", Resources.ParentBusinessUnit, RoleRange.ParentBusinessUnit),
+            new ModelDepthMask(PrivilegeDepthMaskEnum.Organization, "Organization (Global)", Resources.Organization, RoleRange.Organization)
         };
 
         /// <summary>

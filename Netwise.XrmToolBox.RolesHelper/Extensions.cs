@@ -18,14 +18,6 @@ namespace Netwise.XrmToolBox.RolesHelper
     public static class Extensions
     {
         /// <summary>
-        /// Converts current Depth Mask to <see cref="ModelDepthMask"/>.
-        /// </summary>
-        public static ModelDepthMask ToDepthMask(this int mask)
-        {
-            return Dictionary.DepthMasks.Where(model => (int)model.Value == mask).First();
-        }
-
-        /// <summary>
         /// Converts current Access Right value to <see cref="ModelAccessRight"/>.
         /// </summary>
         public static ModelAccessRight ToAccessRight(this int accessRight)

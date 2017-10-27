@@ -43,19 +43,6 @@ namespace Netwise.XrmToolBox.RolesHelper.Models
         }
 
         /// <summary>
-        /// 1. Creates new ModelSortableColumnHeader.
-        /// 2. Adds it to HtmlHelper.SortableColumnHeaders list.
-        /// 3. Returns newly created Header converted to HTML Element.
-        /// </summary>
-        public static ModelSortableColumnHeader New(string headerName, int columnIndex, Func<EntityMetadata, object> orderBy, PluginControl pluginControl = null)
-        {
-            var sortableColumnHeader = new ModelSortableColumnHeader(headerName, columnIndex, orderBy);
-            HtmlHelper.SortableColumnHeaders.Add(sortableColumnHeader);
-            AddToSortingListIfPossible(headerName, pluginControl.CB_Sort);
-            return sortableColumnHeader;
-        }
-
-        /// <summary>
         /// Add name to Sort ComboBox if possible.
         /// </summary>
         private static void AddToSortingListIfPossible(string headerName, ComboBox CB_Sort)

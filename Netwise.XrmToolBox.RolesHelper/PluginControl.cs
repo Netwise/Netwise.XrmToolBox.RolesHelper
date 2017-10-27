@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using WB_Permissions;
 using XrmToolBox.Extensibility;
 
 namespace Netwise.XrmToolBox.RolesHelper
@@ -22,9 +23,8 @@ namespace Netwise.XrmToolBox.RolesHelper
         private System.Windows.Forms.ToolStripMenuItem B_Close;
         private System.Windows.Forms.ToolStripMenuItem B_LoadData;
         private System.Windows.Forms.CheckedListBox CLB_Users;
-        private WebBrowser WB_Permissions;
-        private GroupBox GB_Sorting;
-        public ComboBox CB_Sort;
+        private System.Windows.Forms.Integration.ElementHost elementHost1;
+        private WB_Permissions.WB_Permissions wB_Permissions1;
         private System.Windows.Forms.GroupBox GB_Users;
 
         // Plugin-related properties
@@ -41,31 +41,9 @@ namespace Netwise.XrmToolBox.RolesHelper
             this.Users = new List<ModelSystemUser>();
             this.Roles = new List<ModelRole>();
             this.EntitiesMetadata = new List<EntityMetadata>();
-
-            // Add Columns by which selection can be made
-            this.CB_Sort.Text = string.Empty;
         }
 
         #region Public Methods
-
-        /// <summary>
-        /// Returns currently selected Sortable Header based on what is currently selected in ComboBox.
-        /// </summary>
-        public ModelSortableColumnHeader GetCurrentSelectedSortable()
-        {
-            var headerName = this.CB_Sort.Text;
-            var selectedSortables = HtmlHelper.SortableColumnHeaders.Where(model => model.HeaderName.Equals(headerName));
-            if (selectedSortables.Count() > 0)
-            {
-                var currentSortable = selectedSortables.First();
-                return currentSortable;
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         /// <summary>
         /// Returns multiple records from given Fetch XML Query.
         /// </summary>
@@ -114,22 +92,20 @@ namespace Netwise.XrmToolBox.RolesHelper
             this.GB_Roles = new System.Windows.Forms.GroupBox();
             this.CLB_Roles = new System.Windows.Forms.CheckedListBox();
             this.GB_Permissions = new System.Windows.Forms.GroupBox();
-            this.GB_Sorting = new System.Windows.Forms.GroupBox();
-            this.CB_Sort = new System.Windows.Forms.ComboBox();
-            this.WB_Permissions = new System.Windows.Forms.WebBrowser();
+            this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
+            this.wB_Permissions1 = new WB_Permissions.WB_Permissions();
             this.MainMenu = new System.Windows.Forms.MenuStrip();
             this.B_Close = new System.Windows.Forms.ToolStripMenuItem();
             this.B_LoadData = new System.Windows.Forms.ToolStripMenuItem();
             this.GB_Users.SuspendLayout();
             this.GB_Roles.SuspendLayout();
             this.GB_Permissions.SuspendLayout();
-            this.GB_Sorting.SuspendLayout();
             this.MainMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // GB_Users
             // 
-            this.GB_Users.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.GB_Users.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.GB_Users.Controls.Add(this.CLB_Users);
             this.GB_Users.Location = new System.Drawing.Point(4, 27);
@@ -141,7 +117,7 @@ namespace Netwise.XrmToolBox.RolesHelper
             // 
             // CLB_Users
             // 
-            this.CLB_Users.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.CLB_Users.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.CLB_Users.FormattingEnabled = true;
             this.CLB_Users.Location = new System.Drawing.Point(7, 20);
@@ -152,7 +128,7 @@ namespace Netwise.XrmToolBox.RolesHelper
             // 
             // GB_Roles
             // 
-            this.GB_Roles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.GB_Roles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.GB_Roles.Controls.Add(this.CLB_Roles);
             this.GB_Roles.Location = new System.Drawing.Point(271, 27);
@@ -164,7 +140,7 @@ namespace Netwise.XrmToolBox.RolesHelper
             // 
             // CLB_Roles
             // 
-            this.CLB_Roles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.CLB_Roles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.CLB_Roles.Enabled = false;
             this.CLB_Roles.FormattingEnabled = true;
@@ -175,11 +151,10 @@ namespace Netwise.XrmToolBox.RolesHelper
             // 
             // GB_Permissions
             // 
-            this.GB_Permissions.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.GB_Permissions.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.GB_Permissions.Controls.Add(this.GB_Sorting);
-            this.GB_Permissions.Controls.Add(this.WB_Permissions);
+            this.GB_Permissions.Controls.Add(this.elementHost1);
             this.GB_Permissions.Location = new System.Drawing.Point(538, 27);
             this.GB_Permissions.Name = "GB_Permissions";
             this.GB_Permissions.Size = new System.Drawing.Size(294, 619);
@@ -187,37 +162,17 @@ namespace Netwise.XrmToolBox.RolesHelper
             this.GB_Permissions.TabStop = false;
             this.GB_Permissions.Text = "Permissions";
             // 
-            // GB_Sorting
+            // elementHost1
             // 
-            this.GB_Sorting.Controls.Add(this.CB_Sort);
-            this.GB_Sorting.Location = new System.Drawing.Point(7, 20);
-            this.GB_Sorting.Name = "GB_Sorting";
-            this.GB_Sorting.Size = new System.Drawing.Size(200, 54);
-            this.GB_Sorting.TabIndex = 1;
-            this.GB_Sorting.TabStop = false;
-            this.GB_Sorting.Text = "Sorting";
-            // 
-            // CB_Sort
-            // 
-            this.CB_Sort.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.CB_Sort.FormattingEnabled = true;
-            this.CB_Sort.Location = new System.Drawing.Point(7, 20);
-            this.CB_Sort.Name = "CB_Sort";
-            this.CB_Sort.Size = new System.Drawing.Size(187, 21);
-            this.CB_Sort.TabIndex = 0;
-            this.CB_Sort.SelectedIndexChanged += new System.EventHandler(this.CB_Sort_SelectedIndexChanged);
-            // 
-            // WB_Permissions
-            // 
-            this.WB_Permissions.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.elementHost1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.WB_Permissions.Location = new System.Drawing.Point(7, 80);
-            this.WB_Permissions.MinimumSize = new System.Drawing.Size(20, 20);
-            this.WB_Permissions.Name = "WB_Permissions";
-            this.WB_Permissions.ScriptErrorsSuppressed = true;
-            this.WB_Permissions.Size = new System.Drawing.Size(288, 529);
-            this.WB_Permissions.TabIndex = 0;
+            this.elementHost1.Location = new System.Drawing.Point(6, 20);
+            this.elementHost1.Name = "elementHost1";
+            this.elementHost1.Size = new System.Drawing.Size(282, 589);
+            this.elementHost1.TabIndex = 2;
+            this.elementHost1.Text = "elementHost";
+            this.elementHost1.Child = this.wB_Permissions1;
             // 
             // MainMenu
             // 
@@ -255,7 +210,6 @@ namespace Netwise.XrmToolBox.RolesHelper
             this.GB_Users.ResumeLayout(false);
             this.GB_Roles.ResumeLayout(false);
             this.GB_Permissions.ResumeLayout(false);
-            this.GB_Sorting.ResumeLayout(false);
             this.MainMenu.ResumeLayout(false);
             this.MainMenu.PerformLayout();
             this.ResumeLayout(false);
@@ -266,25 +220,6 @@ namespace Netwise.XrmToolBox.RolesHelper
         #endregion
 
         #region Private Methods
-
-        /// <summary>
-        /// Change table sorting based on selected Column.
-        /// </summary>
-        private void CB_Sort_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            // If selected item is the same as one currently displayed
-            if ((sender as ComboBox).SelectedText.Equals(this.CB_Sort.Text))
-            {
-                return;
-            }
-
-            var selectedHeader = this.GetCurrentSelectedSortable();
-            if (selectedHeader != null)
-            {
-                this.CalculatePermissions();
-            }
-        }
-
         /// <summary>
         /// Close tool window.
         /// </summary>
@@ -314,7 +249,7 @@ namespace Netwise.XrmToolBox.RolesHelper
                     this.PrepareSection<ModelRole>(this.Roles, this.CLB_Roles, this.DownloadRoles);
 
                     // Clear WebBrowser
-                    this.WB_Permissions.DocumentText = string.Empty;
+                    this.wB_Permissions1.RemoveAll();
                 },
                 AsyncArgument = null,
                 IsCancelable = false,
@@ -418,7 +353,7 @@ namespace Netwise.XrmToolBox.RolesHelper
         /// </summary>
         private void CalculatePermissions()
         {
-            this.WB_Permissions.DocumentText = string.Empty;
+            this.wB_Permissions1.RemoveAll();
 
             // Don't count anything if user is not selected
             if (this.CurrentSelectedUser == null)
@@ -427,15 +362,72 @@ namespace Netwise.XrmToolBox.RolesHelper
             }
 
             // Returns all Roles for specified User by SystemUserId
-            var userRoles = this.RetrieveMultiple(FetchQueriesHelper.GetRolesForUser(this.CurrentSelectedUser));
-            // User with all they Roles.
-            var parsedUserRoles = userRoles.ToSystemModelWithRoles();
-            // Check Roles in CheckedListBox
-            CheckRolesForSelectedUser(parsedUserRoles);
-            // Prepare HTML
-            var html = HtmlHelper.PrepareHtml(parsedUserRoles, this, this.EntitiesMetadata);
-            // Set HTML to WebBrowser
-            this.WB_Permissions.DocumentText = html;
+            var userRoles = this.RetrieveMultiple(FetchQueriesHelper.GetRolesForUser(this.CurrentSelectedUser)).ToSystemModelWithRoles();
+            CheckRolesForSelectedUser(userRoles);
+            //var html = HtmlHelper.PrepareHtml(userRoles, this, this.EntitiesMetadata);
+
+            ICollection<DataRow> rows = GetDataRowCollection(userRoles, this.EntitiesMetadata);
+            this.wB_Permissions1.AddRange(rows);
+        }
+
+        /// <summary>
+        /// Pobierz dane dla tabeli Entity Permisiions z CRM.
+        /// </summary>
+        public ICollection<DataRow> GetDataRowCollection(ModelSystemUserWithRoles user, List<EntityMetadata> metadata)
+        {
+            List<DataRow> result = new List<DataRow>();
+            Dictionary<ModelRole, List<ModelRolePrivilege>> LoadedPrivileges =
+                new Dictionary<ModelRole, List<ModelRolePrivilege>>();
+
+            foreach (var role in user.Roles)
+            {
+                var rolePrivileges = GetRolePrivileges(role);
+                LoadedPrivileges.Add(role, rolePrivileges);
+            }
+
+            // For each Entity
+            foreach (EntityMetadata entity in metadata)
+            {
+                if (user.Roles.Count == 0)
+                {
+                    continue;
+                }
+
+                foreach (var privilege in LoadedPrivileges)
+                {
+                    DataRow dataRow = new DataRow()
+                    {
+                        EntityName = entity.DisplayName.UserLocalizedLabel.Label,
+                        EntityLogicalName = entity.LogicalName,
+                        Role = privilege.Key.Name,
+                        Read = GetPrivilegeRange(entity, privilege, PrivilegeType.Read),
+                        Write = GetPrivilegeRange(entity, privilege, PrivilegeType.Write),
+                        Append = GetPrivilegeRange(entity, privilege, PrivilegeType.Append),
+                        AppendTo = GetPrivilegeRange(entity, privilege, PrivilegeType.AppendTo),
+                        Assign = GetPrivilegeRange(entity, privilege, PrivilegeType.Assign),
+                        Delete = GetPrivilegeRange(entity, privilege, PrivilegeType.Delete),
+                        Share = GetPrivilegeRange(entity, privilege, PrivilegeType.Share),
+                    };
+                    result.Add(dataRow);
+                }
+            }
+
+            return result;
+        }
+        public RoleRange GetPrivilegeRange(EntityMetadata entity, KeyValuePair<ModelRole, List<ModelRolePrivilege>> privilege, PrivilegeType type)
+        {
+            SecurityPrivilegeMetadata entityPrivigle = entity.Privileges.Where(p => p.PrivilegeType == type).FirstOrDefault();
+            if (entityPrivigle == null)
+            {
+                return RoleRange.None;
+            }
+            ModelRolePrivilege rolePrivigle = privilege.Value.Where(model => model.PrivilegeId == entityPrivigle.PrivilegeId).FirstOrDefault();
+            if (rolePrivigle == null)
+            {
+                return RoleRange.None;
+            }
+            ModelDepthMask depthMask = Dictionary.DepthMasks.Where(model => (int)model.Value == rolePrivigle.Mask).FirstOrDefault();
+            return depthMask.RoleRange;
         }
 
         /// <summary>
