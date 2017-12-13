@@ -40,6 +40,9 @@
     <AssemblyOriginatorKeyFile>Netwise.XrmToolBox.RolesHelper.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EPPlus, Version=4.1.1.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPPlus.4.1.1\lib\net40\EPPlus.dll</HintPath>
+    </Reference>
     <Reference Include="McTools.Xrm.Connection, Version=1.2017.5.14, Culture=neutral, PublicKeyToken=96037217801d9658, processorArchitecture=MSIL">
       <HintPath>..\packages\MscrmTools.Xrm.Connection.1.2017.5.14\lib\net452\McTools.Xrm.Connection.dll</HintPath>
     </Reference>
@@ -122,8 +125,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Exporters\AbstractExporter.cs" />
+    <Compile Include="Exporters\AbstractExporterConfiguration.cs" />
     <Compile Include="AccessRightEnum.cs" />
     <Compile Include="Dictionary.cs" />
+    <Compile Include="Exporters\Excels\Configurations\ExcelSingleWorkbookConfiguration.cs" />
+    <Compile Include="Exporters\Excels\ExcelExporter.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FetchQueries.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -131,6 +138,8 @@
       <DependentUpon>FetchQueries.resx</DependentUpon>
     </Compile>
     <Compile Include="FetchQueriesHelper.cs" />
+    <Compile Include="Exporters\IExporter.cs" />
+    <Compile Include="Exporters\IExporterConfiguration.cs" />
     <Compile Include="Models\ModelAccessRight.cs" />
     <Compile Include="Models\ModelDepthMask.cs" />
     <Compile Include="Models\ModelPrivilege.cs" />
@@ -154,7 +163,9 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="Netwise.XrmToolBox.RolesHelper.snk" />
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="FetchQueries.resx">
@@ -190,9 +201,13 @@
       <Name>WB_Permissions</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>if $(ConfigurationName) == Debug (
+  IF NOT EXIST Plugins mkdir Plugins
+  copy /Y *.dll Plugins
+  copy /Y *.pdb Plugins
+)</PostBuildEvent>
   </PropertyGroup>
 </Project>
