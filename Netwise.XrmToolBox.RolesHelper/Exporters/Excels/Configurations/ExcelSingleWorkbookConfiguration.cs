@@ -18,8 +18,7 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
         private void PrepareHeader(ExcelWorksheet worksheet)
         {
             // Entity Permissions
-            ExcelRange entityPermissionsRange = worksheet.Cells["A1:J1"];
-            this.PrepareHeaderCells(entityPermissionsRange, Color.White, Color.FromArgb(47, 86, 131), "Entity Permissions");
+            this.PrepareHeaderCells(worksheet.Cells["A1:J1"], Color.White, Color.FromArgb(47, 86, 131), "Entity Permissions");
 
             // Properties columns headers
             Color ntwColor = Color.FromArgb(166, 206, 57);
