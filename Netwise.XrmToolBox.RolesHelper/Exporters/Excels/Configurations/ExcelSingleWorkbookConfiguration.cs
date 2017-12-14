@@ -1,4 +1,5 @@
 ﻿using OfficeOpenXml;
+using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Style;
 using System.Collections.Generic;
 using System.Drawing;
@@ -22,6 +23,10 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
         /// Default Excel column width.
         /// </summary>
         private const double EXCEL_COLUMN_WIDTH = 8.43;
+        /// <summary>
+        /// Default Excel row height.
+        /// </summary>
+        private const double EXCEL_ROW_HEIGHT = 15;
 
         #endregion
 
@@ -46,20 +51,20 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
                     dataRow.EntityName,
                     dataRow.EntityLogicalName,
                     dataRow.Role,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    null
+                    row.ReadImage,
+                    row.WriteImage,
+                    row.DeleteImage,
+                    row.AppendImage,
+                    row.AppendToImage,
+                    row.AssignImage,
+                    row.ShareImage
                 }, 15);
             }
         }
 
         private void PrepareHeader(ExcelWorksheet worksheet)
         {
-            this.PrepareCells(worksheet.Cells["A1:J1"], Color.White, Color.FromArgb(47, 86, 131), "Entity Permissions");
+            this.PrepareCells(worksheet, worksheet.Cells["A1:J1"], Color.White, Color.FromArgb(47, 86, 131), "Entity Permissions");
 
             Color ntwColor = Color.FromArgb(166, 206, 57);
             this.PrepareSingleRow(worksheet, 2, Color.White, ntwColor, new object[]
@@ -73,7 +78,7 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
         {
             for (int i = 0; i < CELLS_IN_ROW; ++i)
             {
-                this.PrepareCells(worksheet.Cells[row, i + 1], fontColor, backgroundColor, values[i]);
+                this.PrepareCells(worksheet, worksheet.Cells[row, i + 1], fontColor, backgroundColor, values[i]);
                 worksheet.Column(i + 1).Width = columnWidth;
             }
 
@@ -84,7 +89,7 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
             }
         }
 
-        private void PrepareCells(ExcelRange cells, Color fontColor, Color backgroundColor, object value,
+        private void PrepareCells(ExcelWorksheet worksheet, ExcelRange cells, Color fontColor, Color backgroundColor, object value,
             ExcelHorizontalAlignment horizontalAlignment = ExcelHorizontalAlignment.Center,
             ExcelVerticalAlignment verticalAlignment = ExcelVerticalAlignment.Center,
             ExcelFillStyle patternType = ExcelFillStyle.Solid)
@@ -102,12 +107,35 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
                 cells.Style.Fill.BackgroundColor.SetColor(backgroundColor);
             }
 
-            // For string add text;
-            // For Image try to insert image
-            if (value is string)
+            // Fill right cell
+            if (value is string) // For string add text
             {
                 cells.Value = value;
             }
+            else if (value is System.Windows.Controls.Image) // For Image try to insert image
+            {
+                System.Windows.Controls.Image parsed = value as System.Windows.Controls.Image;
+                Image image = parsed.ToDrawingImage();
+                int rowIndex = cells.Start.Row;
+                int columnIndex = cells.Start.Column;
+
+                ExcelPicture picture = worksheet.Drawings.AddPicture($"Picture for cell [{ rowIndex };{ columnIndex }]", image);
+                this.SetPicturePosition(worksheet, cells, picture, rowIndex, columnIndex);
+
+                //picture.SetPosition(
+                //    rowIndex - 1,
+                //    0,//(int)(EXCEL_ROW_HEIGHT / 2) - 150, // Row offset for placing image in cell center
+                //    columnIndex - 1,
+                //    0);//(int)(EXCEL_COLUMN_WIDTH / 2) - 150); // Column offset for placing image in cell center
+            }
+        }
+
+        private void SetPicturePosition(ExcelWorksheet worksheet, ExcelRange cells, ExcelPicture picture, int rowIndex, int columnIndex)
+        {
+            double rowOffsetPixels = 0;//worksheet.Column(10).Width;
+            double columnOffsetPixels = 0;// worksheet.Row(1).Height;
+
+            picture.SetPosition(rowIndex - 1, (int)rowOffsetPixels, columnIndex - 1, (int)columnOffsetPixels);
         }
     }
 }

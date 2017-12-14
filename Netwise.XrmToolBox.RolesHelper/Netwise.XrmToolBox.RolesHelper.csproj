@@ -131,6 +131,7 @@
     <Compile Include="Dictionary.cs" />
     <Compile Include="Exporters\Excels\Configurations\ExcelSingleWorkbookConfiguration.cs" />
     <Compile Include="Exporters\Excels\ExcelExporter.cs" />
+    <Compile Include="Exporters\Excels\Extensions.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="FetchQueries.Designer.cs">
       <AutoGen>True</AutoGen>

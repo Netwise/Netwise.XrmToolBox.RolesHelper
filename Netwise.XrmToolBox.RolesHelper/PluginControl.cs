@@ -19,6 +19,8 @@ namespace Netwise.XrmToolBox.RolesHelper
     /// </summary>
     public class PluginControl : PluginControlBase
     {
+        private delegate void SetAllControlsEnabled(bool value);
+
         public System.Windows.Forms.GroupBox GB_Roles;
         public System.Windows.Forms.CheckedListBox CLB_Roles;
         public System.Windows.Forms.GroupBox GB_Permissions;
@@ -112,7 +114,7 @@ namespace Netwise.XrmToolBox.RolesHelper
             // 
             // GB_Users
             // 
-            this.GB_Users.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.GB_Users.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)));
             this.GB_Users.Controls.Add(this.CLB_Users);
             this.GB_Users.Location = new System.Drawing.Point(4, 27);
@@ -124,7 +126,7 @@ namespace Netwise.XrmToolBox.RolesHelper
             // 
             // CLB_Users
             // 
-            this.CLB_Users.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.CLB_Users.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)));
             this.CLB_Users.FormattingEnabled = true;
             this.CLB_Users.Location = new System.Drawing.Point(7, 20);
@@ -135,7 +137,7 @@ namespace Netwise.XrmToolBox.RolesHelper
             // 
             // GB_Roles
             // 
-            this.GB_Roles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.GB_Roles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)));
             this.GB_Roles.Controls.Add(this.CLB_Roles);
             this.GB_Roles.Location = new System.Drawing.Point(271, 27);
@@ -147,7 +149,7 @@ namespace Netwise.XrmToolBox.RolesHelper
             // 
             // CLB_Roles
             // 
-            this.CLB_Roles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.CLB_Roles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)));
             this.CLB_Roles.Enabled = false;
             this.CLB_Roles.FormattingEnabled = true;
@@ -158,8 +160,8 @@ namespace Netwise.XrmToolBox.RolesHelper
             // 
             // GB_Permissions
             // 
-            this.GB_Permissions.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.GB_Permissions.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.GB_Permissions.Controls.Add(this.elementHost1);
             this.GB_Permissions.Location = new System.Drawing.Point(538, 27);
@@ -213,8 +215,8 @@ namespace Netwise.XrmToolBox.RolesHelper
             // 
             // elementHost1
             // 
-            this.elementHost1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.elementHost1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
             this.elementHost1.Location = new System.Drawing.Point(6, 20);
             this.elementHost1.Name = "elementHost1";
@@ -263,8 +265,11 @@ namespace Netwise.XrmToolBox.RolesHelper
                 Message = "Loading Users, Roles and Permissions from CRM...",
                 Work = (backgroundWorker, args) =>
                 {
-                    // Entity Metadata
-                    this.EntitiesMetadata = this.Service.GetEntityMetadatas();
+                    this.WrapAsyncFunction(() =>
+                    {
+                        // Entity Metadata
+                        this.EntitiesMetadata = this.Service.GetEntityMetadatas();
+                    });
                 },
                 PostWorkCallBack = args =>
                 {
@@ -298,10 +303,14 @@ namespace Netwise.XrmToolBox.RolesHelper
                     Message = $"Exporting to Excel File ({ fileName })",
                     Work = (backgroundWorker, args) =>
                     {
-                        ExcelExporter exporter = new ExcelExporter();
-                        exporter.Export(this, fileName, new ExcelSingleWorkbookConfiguration());
-                        // Let file be created
-                        Thread.Sleep(2000);
+                        this.WrapAsyncFunction(() =>
+                        {
+                            ExcelExporter exporter = new ExcelExporter();
+                            exporter.Export(this, fileName, new ExcelSingleWorkbookConfiguration());
+
+                            // Let file be created
+                            Thread.Sleep(2000);
+                        });
                     },
                     AsyncArgument = null,
                     IsCancelable = false,
@@ -309,6 +318,22 @@ namespace Netwise.XrmToolBox.RolesHelper
                     MessageHeight = 150
                 });
             }
+        }
+
+        /// <summary>
+        /// Wraps UI async functions.
+        /// </summary>
+        private void WrapAsyncFunction(Action action)
+        {
+            SetAllControlsEnabled del = new SetAllControlsEnabled(this.SetAllEnable);
+
+            // Disable Controls
+            this.Invoke(del, new object[] { false });
+
+            action();
+
+            // Enable Controls
+            this.Invoke(del, new object[] { true });
         }
 
         /// <summary>
@@ -375,6 +400,7 @@ namespace Netwise.XrmToolBox.RolesHelper
         {
             this.CLB_Users.Enabled = isEnabled;
             this.CLB_Roles.Enabled = isEnabled;
+            this.wB_Permissions1.IsEnabled = isEnabled;
         }
 
         /// <summary>
@@ -383,7 +409,7 @@ namespace Netwise.XrmToolBox.RolesHelper
         private void OnIndexChanged(CheckedListBox listBox)
         {
             // Prevent from further clicking
-            SetAllEnable(false);
+            this.SetAllEnable(false);
 
             // Uncheck everything
             listBox.ClearAllSelections();
@@ -397,8 +423,8 @@ namespace Netwise.XrmToolBox.RolesHelper
             // Calculate permissions for selected User
             CalculatePermissions();
 
-            // After everything enable Users
-            this.CLB_Users.Enabled = true;
+            // After everything enable - enable Roles for future plans
+            this.SetAllEnable(true);
         }
 
         /// <summary>
