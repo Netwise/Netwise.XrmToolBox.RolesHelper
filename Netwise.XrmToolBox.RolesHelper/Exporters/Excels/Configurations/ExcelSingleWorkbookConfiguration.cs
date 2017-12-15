@@ -112,7 +112,7 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
             {
                 cells.Value = value;
             }
-            else if (value is System.Windows.Controls.Image) // For Image try to insert image
+            else if (value is System.Windows.Controls.Image) // For Image try to insert image - by default it will understand Image as System.Drawing.Image (it is not)
             {
                 System.Windows.Controls.Image parsed = value as System.Windows.Controls.Image;
                 Image image = parsed.ToDrawingImage();
