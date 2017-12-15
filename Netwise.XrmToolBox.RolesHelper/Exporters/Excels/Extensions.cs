@@ -1,6 +1,5 @@
-﻿using System;
-using System.IO;
-using System.Windows.Media.Imaging;
+﻿using Netwise.XrmToolBox.RolesHelper.Properties;
+using System;
 
 namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels
 {
@@ -17,12 +16,14 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels
 
         private static System.Drawing.Image ConvertImage(this System.Windows.Controls.Image image)
         {
-            MemoryStream ms = new MemoryStream();
-            BmpBitmapEncoder bbe = new BmpBitmapEncoder();
-            bbe.Frames.Add(BitmapFrame.Create(new Uri(image.Source.ToString(), UriKind.RelativeOrAbsolute)));
-            bbe.Save(ms);
-            System.Drawing.Image newImage = System.Drawing.Image.FromStream(ms);
-            return newImage;
+            var imagePath = image.Source.ToString();
+
+            if (imagePath.EndsWith("BusinessUnit.gif")) return Resources.BusinessUnit;
+            else if (imagePath.EndsWith("Empty.gif")) return Resources.Empty;
+            else if (imagePath.EndsWith("Organization.gif")) return Resources.Organization;
+            else if (imagePath.EndsWith("ParentBusinessUnit.gif")) return Resources.ParentBusinessUnit;
+            else if (imagePath.EndsWith("User.gif")) return Resources.User;
+            else throw new Exception($"Unknown image: { imagePath }");
         }
     }
 }
