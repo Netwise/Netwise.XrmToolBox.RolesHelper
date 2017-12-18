@@ -20,9 +20,10 @@ namespace Netwise.XrmToolBox.RolesHelper
     public class PluginControl : PluginControlBase
     {
         private delegate void SetAllControlsEnabled(bool value);
+        private delegate CheckedListBox.CheckedItemCollection GetCheckedRolesDelegate();
 
         public System.Windows.Forms.GroupBox GB_Roles;
-        public System.Windows.Forms.CheckedListBox CLB_Roles;
+        private System.Windows.Forms.CheckedListBox CLB_Roles;
         public System.Windows.Forms.GroupBox GB_Permissions;
         public System.Windows.Forms.MenuStrip MainMenu;
         public System.Windows.Forms.ToolStripMenuItem B_Close;
@@ -86,6 +87,16 @@ namespace Netwise.XrmToolBox.RolesHelper
                 list.Add(parsed);
             }
             return list;
+        }
+
+        /// <summary>
+        /// Cross-thread method to get list of checked Roles.
+        /// </summary>
+        public System.Windows.Forms.CheckedListBox.CheckedItemCollection GetCheckedRoles()
+        {
+            GetCheckedRolesDelegate del = new GetCheckedRolesDelegate(this.GetCheckedRolesDel);
+            var ret = del.Invoke();
+            return ret;
         }
 
         #endregion
@@ -246,6 +257,15 @@ namespace Netwise.XrmToolBox.RolesHelper
         #endregion
 
         #region Private Methods
+        /// <summary>
+        /// Method used by the delegate.
+        /// See this.GetCheckedRoles();
+        /// </summary>
+        private System.Windows.Forms.CheckedListBox.CheckedItemCollection GetCheckedRolesDel()
+        {
+            return this.CLB_Roles.CheckedItems;
+        }
+
         /// <summary>
         /// Close tool window.
         /// </summary>

@@ -3,6 +3,8 @@ using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Style;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
 using WB_Permissions;
 
 namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
@@ -40,17 +42,32 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
 
         public override void PrepareData(ExcelPackage package, PluginControl dataHolder)
         {
+            List<DataRowMetadata> allRows = dataHolder.wB_Permissions1.RowsMetadata;
+
             // Worksheet #1 - All
-            ExcelWorksheet worksheetAll = package.Workbook.Worksheets.Add("All Roles");
-            this.PrepareHeader(worksheetAll);
-            this.PrepareDataRows(worksheetAll, dataHolder.wB_Permissions1.RowsMetadata);
+            this.PrepareWorksheet(package, "All Roles", allRows);
 
             // Worksheet #2...n - Worksheet per Role
+            CheckedListBox.CheckedItemCollection checkedItems = dataHolder.GetCheckedRoles();
+            string roleName = "";
+            for (int i = 0; i < checkedItems.Count; ++i)
+            {
+                roleName = checkedItems[i].ToString();
+                List<DataRowMetadata> rows = allRows.Where(row => row.DataRow.Role.Equals(roleName)).ToList();
+                this.PrepareWorksheet(package, roleName, rows);
+            }
+        }
+
+        private void PrepareWorksheet(ExcelPackage package, string worksheetName, List<DataRowMetadata> rows)
+        {
+            ExcelWorksheet worksheet = package.Workbook.Worksheets.Add(worksheetName);
+            this.PrepareHeader(worksheet);
+            this.PrepareDataRows(worksheet, rows);
         }
 
         private void PrepareDataRows(ExcelWorksheet worksheet, List<DataRowMetadata> rows)
         {
-            for (int i = 0; i < 5; ++i) // rows.Count
+            for (int i = 0; i < rows.Count; ++i)
             {
                 DataRowMetadata row = rows[i];
                 DataRow dataRow = row.DataRow;
@@ -131,7 +148,7 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
 
                 picture.SetPosition(
                     rowIndex - 1,
-                    (int)(worksheet.Row(rowIndex).Height / 4), // row center height
+                    (int)(worksheet.Row(rowIndex).Height / 4), // row height center
                     columnIndex - 1,
                     (int)(worksheet.Column(columnIndex).Width * 3)); // column width center
             }
