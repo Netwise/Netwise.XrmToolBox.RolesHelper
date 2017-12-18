@@ -27,6 +27,14 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
         /// Default Excel row height.
         /// </summary>
         private const double EXCEL_ROW_HEIGHT = 15;
+        /// <summary>
+        /// Excel cell width in pixels.
+        /// </summary>
+        private const int EXCEL_COLUMN_WIDTH_PIXELS = 64;
+        /// <summary>
+        /// Excel row height in pixels.
+        /// </summary>
+        private const int EXCEL_ROW_HEIGHT_PIXELS = 20;
 
         #endregion
 
@@ -42,7 +50,7 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
 
         private void PrepareDataRows(ExcelWorksheet worksheet, List<DataRowMetadata> rows)
         {
-            for (int i = 0; i < rows.Count; ++i)
+            for (int i = 0; i < 5; ++i) // rows.Count
             {
                 DataRowMetadata row = rows[i];
                 DataRow dataRow = row.DataRow;
@@ -78,11 +86,11 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
         {
             for (int i = 0; i < CELLS_IN_ROW; ++i)
             {
-                this.PrepareCells(worksheet, worksheet.Cells[row, i + 1], fontColor, backgroundColor, values[i]);
                 worksheet.Column(i + 1).Width = columnWidth;
+                this.PrepareCells(worksheet, worksheet.Cells[row, i + 1], fontColor, backgroundColor, values[i]);
             }
 
-            // For 2 first columns change size
+            // For 2 first columns (EntityName, EntityLogicalName) change size
             for (int i = 0; i < 2; ++i)
             {
                 worksheet.Column(i + 1).Width = 2 * columnWidth;
@@ -120,22 +128,13 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
                 int columnIndex = cells.Start.Column;
 
                 ExcelPicture picture = worksheet.Drawings.AddPicture($"Picture for cell [{ rowIndex };{ columnIndex }]", image);
-                this.SetPicturePosition(worksheet, cells, picture, rowIndex, columnIndex);
 
-                //picture.SetPosition(
-                //    rowIndex - 1,
-                //    0,//(int)(EXCEL_ROW_HEIGHT / 2) - 150, // Row offset for placing image in cell center
-                //    columnIndex - 1,
-                //    0);//(int)(EXCEL_COLUMN_WIDTH / 2) - 150); // Column offset for placing image in cell center
+                picture.SetPosition(
+                    rowIndex - 1,
+                    (int)(worksheet.Row(rowIndex).Height / 4), // row center height
+                    columnIndex - 1,
+                    (int)(worksheet.Column(columnIndex).Width * 3)); // column width center
             }
-        }
-
-        private void SetPicturePosition(ExcelWorksheet worksheet, ExcelRange cells, ExcelPicture picture, int rowIndex, int columnIndex)
-        {
-            double rowOffsetPixels = 0;//worksheet.Column(10).Width;
-            double columnOffsetPixels = 0;// worksheet.Row(1).Height;
-
-            picture.SetPosition(rowIndex - 1, (int)rowOffsetPixels, columnIndex - 1, (int)columnOffsetPixels);
         }
     }
 }
