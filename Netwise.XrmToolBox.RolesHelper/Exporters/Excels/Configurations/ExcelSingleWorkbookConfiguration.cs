@@ -1,6 +1,7 @@
 ﻿using OfficeOpenXml;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Style;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -13,6 +14,10 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
     {
         #region Constants
 
+        /// <summary>
+        /// Full plugin name.
+        /// </summary>
+        private const string PLUGIN_NAME = "Netwise.XrmToolBox.RolesHelper";
         /// <summary>
         /// Number of rows reserved for headers.
         /// </summary>
@@ -56,6 +61,14 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
                 List<DataRowMetadata> rows = allRows.Where(row => row.DataRow.Role.Equals(roleName)).ToList();
                 this.PrepareWorksheet(package, roleName, rows);
             }
+
+            // Sign Excel file
+            package.Workbook.Properties.Author = PLUGIN_NAME;
+            package.Workbook.Properties.LastModifiedBy = PLUGIN_NAME;
+            package.Workbook.Properties.Created = DateTime.Now;
+            /// Short description - in this order properties are shown in file properties
+            package.Workbook.Properties.Title = $"Generated with: { PLUGIN_NAME }";
+            package.Workbook.Properties.Subject = "https://github.com/Netwise/Netwise.XrmToolBox.RolesHelper";
         }
 
         private void PrepareWorksheet(ExcelPackage package, string worksheetName, List<DataRowMetadata> rows)
