@@ -125,8 +125,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Exporters\AbstractExporter.cs" />
-    <Compile Include="Exporters\AbstractExporterConfiguration.cs" />
     <Compile Include="AccessRightEnum.cs" />
     <Compile Include="Dictionary.cs" />
     <Compile Include="Exporters\Excels\Configurations\ExcelSingleWorkbookConfiguration.cs" />

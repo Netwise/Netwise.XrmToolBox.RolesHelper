@@ -4,15 +4,14 @@ using System.Windows.Forms;
 
 namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels
 {
-    public class ExcelExporter : AbstractExporter<PluginControl, string, ExcelPackage>
+    public class ExcelExporter : IExporter<PluginControl, string, ExcelPackage, FileInfo>
     {
-        public override void Export(PluginControl data, string destination, IExporterConfiguration<ExcelPackage, PluginControl> configuration)
+        public FileInfo Export(PluginControl data, string destination, IExporterConfiguration<ExcelPackage, PluginControl> configuration)
         {
             FileInfo file = new FileInfo(destination);
             if (file.Exists)
             {
-                MessageBox.Show("File with specified name already exists. Specified new name.");
-                return;
+                MessageBox.Show("File with specified name already exists. Specify new name.");
             }
             else
             {
@@ -22,6 +21,7 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels
                     package.SaveAs(file);
                 }
             }
+            return file;
         }
     }
 }

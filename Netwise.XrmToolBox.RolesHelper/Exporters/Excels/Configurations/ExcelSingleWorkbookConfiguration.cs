@@ -10,7 +10,7 @@ using WB_Permissions;
 
 namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
 {
-    public class ExcelSingleWorkbookConfiguration : AbstractExporterConfiguration<ExcelPackage, PluginControl>
+    public class ExcelSingleWorkbookConfiguration : IExporterConfiguration<ExcelPackage, PluginControl>
     {
         #region Constants
 
@@ -45,7 +45,7 @@ namespace Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations
 
         #endregion
 
-        public override void PrepareData(ExcelPackage package, PluginControl dataHolder)
+        public void PrepareData(ExcelPackage package, PluginControl dataHolder)
         {
             List<DataRowMetadata> allRows = dataHolder.wB_Permissions1.RowsMetadata;
 
