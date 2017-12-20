@@ -6,6 +6,8 @@ using Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations;
 using Netwise.XrmToolBox.RolesHelper.Models;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
@@ -326,10 +328,16 @@ namespace Netwise.XrmToolBox.RolesHelper
                         this.WrapAsyncFunction(() =>
                         {
                             ExcelExporter exporter = new ExcelExporter();
-                            exporter.Export(this, fileName, new ExcelSingleWorkbookConfiguration());
+                            FileInfo excelFile = exporter.Export(this, fileName, new ExcelSingleWorkbookConfiguration());
 
-                            // Let file be created
-                            Thread.Sleep(2000);
+                            if (excelFile.Exists)
+                            {
+                                DialogResult result = MessageBox.Show("Do You want to open newly created file ?", "Open Excel", MessageBoxButtons.OKCancel);
+                                if (result == DialogResult.OK)
+                                {
+                                    Process.Start(excelFile.FullName);
+                                }
+                            }
                         });
                     },
                     AsyncArgument = null,
