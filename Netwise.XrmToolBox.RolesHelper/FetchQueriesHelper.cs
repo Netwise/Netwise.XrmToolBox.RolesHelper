@@ -11,9 +11,25 @@ namespace Netwise.XrmToolBox.RolesHelper
         /// <summary>
         /// Returns actual Fetch XML <see cref="string"/> for <see cref="FetchQueries.GetRolesForUser"/>.
         /// </summary>
+        public static string GetRolesForUser(string user)
+        {
+            return string.Format(FetchQueries.GetRolesForUser, user);
+        }
+
+        /// <summary>
+        /// Returns actual Fetch XML <see cref="string"/> for <see cref="FetchQueries.GetRolesForUser"/>.
+        /// </summary>
+        public static string GetRolesForUser(Guid user)
+        {
+            return GetRolesForUser(user.ToString("D"));
+        }
+
+        /// <summary>
+        /// Returns actual Fetch XML <see cref="string"/> for <see cref="FetchQueries.GetRolesForUser"/>.
+        /// </summary>
         public static string GetRolesForUser(ModelSystemUser user)
         {
-            return string.Format(FetchQueries.GetRolesForUser, user.SystemUserId);
+            return GetRolesForUser(user.SystemUserId);
         }
 
         /// <summary>

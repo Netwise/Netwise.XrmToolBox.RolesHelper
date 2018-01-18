@@ -1,9 +1,11 @@
 ﻿using Microsoft.Xrm.Sdk;
 using Microsoft.Xrm.Sdk.Metadata;
 using Microsoft.Xrm.Sdk.Query;
+using Netwise.XrmToolBox.RolesHelper.Exporters;
 using Netwise.XrmToolBox.RolesHelper.Exporters.Excels;
 using Netwise.XrmToolBox.RolesHelper.Exporters.Excels.Configurations;
 using Netwise.XrmToolBox.RolesHelper.Models;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,6 +24,7 @@ namespace Netwise.XrmToolBox.RolesHelper
     {
         private delegate void SetAllControlsEnabled(bool value);
         private delegate CheckedListBox.CheckedItemCollection GetCheckedRolesDelegate();
+        private delegate EntityCollection RetrieveMultipleDelegate(string fetchXml);
 
         public System.Windows.Forms.GroupBox GB_Roles;
         private System.Windows.Forms.CheckedListBox CLB_Roles;
@@ -34,6 +37,7 @@ namespace Netwise.XrmToolBox.RolesHelper
         public WB_Permissions.WB_Permissions wB_Permissions1;
         public ToolStripMenuItem TSMI_Export;
         public ToolStripMenuItem TSMI_SubItem_ExcelSingleFile;
+        private ToolStripMenuItem TSMI_SubItem_ExcelUsersAndRoles;
         public System.Windows.Forms.GroupBox GB_Users;
 
         // Plugin-related properties
@@ -53,16 +57,6 @@ namespace Netwise.XrmToolBox.RolesHelper
         }
 
         #region Public Methods
-        /// <summary>
-        /// Returns multiple records from given Fetch XML Query.
-        /// </summary>
-        public EntityCollection RetrieveMultiple(string fetch)
-        {
-            // Prepare Query
-            var query = new FetchExpression(fetch);
-            return this.Service.RetrieveMultiple(query);
-        }
-
         /// <summary>
         /// Returns single <see cref="Entity"/> record from given Fetch XML Query.
         /// </summary>
@@ -100,6 +94,16 @@ namespace Netwise.XrmToolBox.RolesHelper
             return ret;
         }
 
+        /// <summary>
+        /// Cross-thread method to execute fetchXml.
+        /// </summary>
+        public EntityCollection RetrieveMultiple(string fetchXml)
+        {
+            RetrieveMultipleDelegate del = new RetrieveMultipleDelegate(this.ExecuteFetch);
+            EntityCollection ret = del.Invoke(fetchXml);
+            return ret;
+        }
+
         #endregion
 
         #region Designer Component Initialization
@@ -111,13 +115,14 @@ namespace Netwise.XrmToolBox.RolesHelper
             this.GB_Roles = new System.Windows.Forms.GroupBox();
             this.CLB_Roles = new System.Windows.Forms.CheckedListBox();
             this.GB_Permissions = new System.Windows.Forms.GroupBox();
+            this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
+            this.wB_Permissions1 = new WB_Permissions.WB_Permissions();
             this.MainMenu = new System.Windows.Forms.MenuStrip();
             this.B_Close = new System.Windows.Forms.ToolStripMenuItem();
             this.B_LoadData = new System.Windows.Forms.ToolStripMenuItem();
             this.TSMI_Export = new System.Windows.Forms.ToolStripMenuItem();
             this.TSMI_SubItem_ExcelSingleFile = new System.Windows.Forms.ToolStripMenuItem();
-            this.elementHost1 = new System.Windows.Forms.Integration.ElementHost();
-            this.wB_Permissions1 = new WB_Permissions.WB_Permissions();
+            this.TSMI_SubItem_ExcelUsersAndRoles = new System.Windows.Forms.ToolStripMenuItem();
             this.GB_Users.SuspendLayout();
             this.GB_Roles.SuspendLayout();
             this.GB_Permissions.SuspendLayout();
@@ -126,7 +131,7 @@ namespace Netwise.XrmToolBox.RolesHelper
             // 
             // GB_Users
             // 
-            this.GB_Users.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.GB_Users.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.GB_Users.Controls.Add(this.CLB_Users);
             this.GB_Users.Location = new System.Drawing.Point(4, 27);
@@ -138,7 +143,7 @@ namespace Netwise.XrmToolBox.RolesHelper
             // 
             // CLB_Users
             // 
-            this.CLB_Users.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.CLB_Users.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.CLB_Users.FormattingEnabled = true;
             this.CLB_Users.Location = new System.Drawing.Point(7, 20);
@@ -149,7 +154,7 @@ namespace Netwise.XrmToolBox.RolesHelper
             // 
             // GB_Roles
             // 
-            this.GB_Roles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.GB_Roles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.GB_Roles.Controls.Add(this.CLB_Roles);
             this.GB_Roles.Location = new System.Drawing.Point(271, 27);
@@ -161,7 +166,7 @@ namespace Netwise.XrmToolBox.RolesHelper
             // 
             // CLB_Roles
             // 
-            this.CLB_Roles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            this.CLB_Roles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left)));
             this.CLB_Roles.Enabled = false;
             this.CLB_Roles.FormattingEnabled = true;
@@ -172,8 +177,8 @@ namespace Netwise.XrmToolBox.RolesHelper
             // 
             // GB_Permissions
             // 
-            this.GB_Permissions.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            this.GB_Permissions.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.GB_Permissions.Controls.Add(this.elementHost1);
             this.GB_Permissions.Location = new System.Drawing.Point(538, 27);
@@ -182,6 +187,18 @@ namespace Netwise.XrmToolBox.RolesHelper
             this.GB_Permissions.TabIndex = 2;
             this.GB_Permissions.TabStop = false;
             this.GB_Permissions.Text = "Permissions";
+            // 
+            // elementHost1
+            // 
+            this.elementHost1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.elementHost1.Location = new System.Drawing.Point(6, 20);
+            this.elementHost1.Name = "elementHost1";
+            this.elementHost1.Size = new System.Drawing.Size(282, 589);
+            this.elementHost1.TabIndex = 2;
+            this.elementHost1.Text = "elementHost";
+            this.elementHost1.Child = this.wB_Permissions1;
             // 
             // MainMenu
             // 
@@ -212,7 +229,8 @@ namespace Netwise.XrmToolBox.RolesHelper
             // TSMI_Export
             // 
             this.TSMI_Export.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.TSMI_SubItem_ExcelSingleFile});
+            this.TSMI_SubItem_ExcelSingleFile,
+            this.TSMI_SubItem_ExcelUsersAndRoles});
             this.TSMI_Export.Name = "TSMI_Export";
             this.TSMI_Export.Size = new System.Drawing.Size(69, 20);
             this.TSMI_Export.Text = "Export to:";
@@ -220,22 +238,18 @@ namespace Netwise.XrmToolBox.RolesHelper
             // TSMI_SubItem_ExcelSingleFile
             // 
             this.TSMI_SubItem_ExcelSingleFile.Name = "TSMI_SubItem_ExcelSingleFile";
-            this.TSMI_SubItem_ExcelSingleFile.Size = new System.Drawing.Size(164, 22);
-            this.TSMI_SubItem_ExcelSingleFile.Text = "Excel - Single File";
+            this.TSMI_SubItem_ExcelSingleFile.Size = new System.Drawing.Size(316, 22);
+            this.TSMI_SubItem_ExcelSingleFile.Text = "Excel - Single File (Export Everything)";
             this.TSMI_SubItem_ExcelSingleFile.ToolTipText = "Worksheet #1 - All\r\nWorksheet #2...n - Worksheet per Role";
             this.TSMI_SubItem_ExcelSingleFile.Click += new System.EventHandler(this.TSMI_SubItem_ExcelSingleFile_Click);
             // 
-            // elementHost1
+            // TSMI_SubItem_ExcelUsersAndRoles
             // 
-            this.elementHost1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.elementHost1.Location = new System.Drawing.Point(6, 20);
-            this.elementHost1.Name = "elementHost1";
-            this.elementHost1.Size = new System.Drawing.Size(282, 589);
-            this.elementHost1.TabIndex = 2;
-            this.elementHost1.Text = "elementHost";
-            this.elementHost1.Child = this.wB_Permissions1;
+            this.TSMI_SubItem_ExcelUsersAndRoles.Name = "TSMI_SubItem_ExcelUsersAndRoles";
+            this.TSMI_SubItem_ExcelUsersAndRoles.Size = new System.Drawing.Size(316, 22);
+            this.TSMI_SubItem_ExcelUsersAndRoles.Text = "Excel - Users with Roles (Without Permissions)";
+            this.TSMI_SubItem_ExcelUsersAndRoles.ToolTipText = "Creates new Excel file which contains Users with connected Roles.";
+            this.TSMI_SubItem_ExcelUsersAndRoles.Click += new System.EventHandler(this.TSMI_SubItem_ExcelUsersAndRoles_Click);
             // 
             // PluginControl
             // 
@@ -258,6 +272,16 @@ namespace Netwise.XrmToolBox.RolesHelper
         #endregion
 
         #region Private Methods
+        /// <summary>
+        /// Returns multiple records from given Fetch XML Query.
+        /// </summary>
+        private EntityCollection ExecuteFetch(string fetch)
+        {
+            // Prepare Query
+            var query = new FetchExpression(fetch);
+            return this.Service.RetrieveMultiple(query);
+        }
+
         /// <summary>
         /// Method used by the delegate.
         /// See this.GetCheckedRoles();
@@ -309,9 +333,23 @@ namespace Netwise.XrmToolBox.RolesHelper
         }
 
         /// <summary>
-        /// Start export to Excel.
+        /// Start export to Excel (Everything).
         /// </summary>
         private void TSMI_SubItem_ExcelSingleFile_Click(object sender, EventArgs e)
+        {
+            this.ExportToExcelButtonClick<ExcelSingleWorkbookConfiguration>(sender, e);
+        }
+
+        /// <summary>
+        /// Start export to Excel (Users + Roles).
+        /// </summary>
+        private void TSMI_SubItem_ExcelUsersAndRoles_Click(object sender, EventArgs e)
+        {
+            this.ExportToExcelButtonClick<ExcelUsersAndRolesConfiguration>(sender, e);
+        }
+
+        private void ExportToExcelButtonClick<TExporterConfiguration>(object sender, EventArgs e)
+            where TExporterConfiguration : IExporterConfiguration<ExcelPackage, PluginControl>, new()
         {
             var saveFileDialog = new SaveFileDialog();
             saveFileDialog.Filter = "Microsoft Excel Worksheet (*.xlsx)|*.xlsx|Microsoft Excel Worksheet Macro (*.xlsm)|*.xlsm";
@@ -327,7 +365,7 @@ namespace Netwise.XrmToolBox.RolesHelper
                         this.WrapAsyncFunction(() =>
                         {
                             ExcelExporter exporter = new ExcelExporter();
-                            FileInfo excelFile = exporter.Export(this, fileName, new ExcelSingleWorkbookConfiguration());
+                            FileInfo excelFile = exporter.Export(this, fileName, new TExporterConfiguration());
 
                             if (excelFile.Exists)
                             {

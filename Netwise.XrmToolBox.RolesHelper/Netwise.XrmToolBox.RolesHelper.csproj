@@ -127,7 +127,9 @@
   <ItemGroup>
     <Compile Include="AccessRightEnum.cs" />
     <Compile Include="Dictionary.cs" />
+    <Compile Include="Exporters\Excels\Configurations\AbstractExcelConfiguration.cs" />
     <Compile Include="Exporters\Excels\Configurations\ExcelSingleWorkbookConfiguration.cs" />
+    <Compile Include="Exporters\Excels\Configurations\ExcelUsersAndRolesConfiguration.cs" />
     <Compile Include="Exporters\Excels\ExcelExporter.cs" />
     <Compile Include="Exporters\Excels\Extensions.cs" />
     <Compile Include="Extensions.cs" />
